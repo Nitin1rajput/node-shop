@@ -59,16 +59,6 @@ mongoose
 
   .then((result) => {
     console.log("connected");
-    User.findOne().then((user) => {
-      if (!user) {
-        const user = new User({
-          name: "Nitin",
-          email: "nitin3emails@gmail.com",
-          cart: { items: [] },
-        });
-        user.save();
-      }
-    });
 
     app.listen(3000);
   })
