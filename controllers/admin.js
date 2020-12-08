@@ -13,9 +13,12 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postAddProduct = (req, res, next) => {
   const title = req.body.title;
-  const imageUrl = req.body.imageUrl;
+  const imageUrl = req.file;
   const price = req.body.price;
   const description = req.body.description;
+  if (!image) {
+    return res.status(422);
+  }
   const product = new Product({
     title: title,
     price: price,
