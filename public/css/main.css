@@ -242,8 +242,9 @@ form {
   text-align: center;
 }
 .user-message--error {
-  border-color: red;
-  background: rgb(206, 87, 87);
+  border: 2px solid rgb(255, 72, 0);
+  background: rgb(230, 111, 111);
+  color: rgb(252, 251, 250);
 }
 
 @media (min-width: 768px) {
