@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Product = require("../models/product");
 
 exports.getAddProduct = (req, res, next) => {
@@ -6,6 +7,7 @@ exports.getAddProduct = (req, res, next) => {
     path: "/admin/add-product",
     editing: false,
     isAuthenticated: req.session.isLoggedIn,
+    errorMessage: "",
   });
 };
 
@@ -29,11 +31,20 @@ exports.postAddProduct = (req, res, next) => {
       res.redirect("/admin/products");
     })
     .catch((err) => {
-      console.log(err);
+      // res.status(500).render("admin/edit-product", {
+      //   pageTitle: "Add Product",
+      //   path: "admin/add-product",
+      //   editing: false,
+      //   errorMessage: "Database operation failed, please try again",
+      // });
+      const error = new Error("Creating Product Failed");
+      error.httpStatusCode = 500;
+      return next(error);
     });
 };
 
 exports.getEditProduct = (req, res, next) => {
+  // console.log("hua");
   const editMode = req.query.edit;
   if (!editMode) {
     return res.redirect("/");
@@ -44,15 +55,22 @@ exports.getEditProduct = (req, res, next) => {
       if (!product) {
         return res.redirect("/");
       }
+      // console.log("find");
       res.render("admin/edit-product", {
         pageTitle: "Edit Product",
         path: "/admin/edit-product",
         editing: editMode,
         product: product,
         isAuthenticated: req.session.isLoggedIn,
+        errorMessage: "",
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      console.log(err);
+      // const error = new Error(err);
+      // error.httpStatusCode = 500;
+      // return next(error);
+    });
 };
 
 exports.postEditProduct = (req, res, next) => {
@@ -74,7 +92,11 @@ exports.postEditProduct = (req, res, next) => {
       console.log("UPDATED PRODUCT!");
       res.redirect("/admin/products");
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
 
 exports.getProducts = (req, res, next) => {
@@ -82,7 +104,6 @@ exports.getProducts = (req, res, next) => {
     // .select('title price -_id')
     // .populate('userId', 'name')
     .then((products) => {
-      console.log(products);
       res.render("admin/products", {
         prods: products,
         pageTitle: "Admin Products",
@@ -90,7 +111,11 @@ exports.getProducts = (req, res, next) => {
         isAuthenticated: req.session.isLoggedIn,
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
 
 exports.postDeleteProduct = (req, res, next) => {
@@ -100,5 +125,9 @@ exports.postDeleteProduct = (req, res, next) => {
       console.log("DESTROYED PRODUCT");
       res.redirect("/admin/products");
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };

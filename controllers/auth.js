@@ -34,7 +34,7 @@ exports.getSignup = (req, res, next) => {
     pageTitle: "SignUp",
     errorMessage: message,
     oldInput: { name: "", email: "", password: "" },
-    validationErrors: errors.array(),
+    validationErrors: [],
   });
 };
 
@@ -82,9 +82,17 @@ exports.postLogin = (req, res, next) => {
             validationErrors: [],
           });
         })
-        .catch((err) => console.log(err));
+        .catch((err) => {
+          const error = new Error(err);
+          error.httpStatusCode = 500;
+          return next(error);
+        });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
 
 exports.postSignup = (req, res, next) => {
@@ -94,6 +102,7 @@ exports.postSignup = (req, res, next) => {
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.log(errors);
     return res.status(422).render("auth/signup", {
       path: "/signup",
       pageTitle: "SignUp",
@@ -116,7 +125,11 @@ exports.postSignup = (req, res, next) => {
     })
     .then((result) => res.redirect("/login"))
 
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
 
 exports.postLogout = (req, res, next) => {

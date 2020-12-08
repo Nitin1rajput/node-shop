@@ -22,8 +22,7 @@ router.post(
     "Please enter a password at least 6 characters and must contain alpha numeric"
   )
     .isLength({ min: 6 })
-    .isAlphanumeric()
-    .trim(),
+    .isAlphanumeric(),
   authController.postLogin
 );
 
@@ -42,21 +41,19 @@ router.post(
           return Promise.reject("Email exists already");
         }
       });
-    }).normalizeEmail,
+    })
+    .normalizeEmail(),
   body(
     "password",
     "Please enter a password at least 6 characters and must contain alpha numeric"
-  )
-    .isLength({ min: 6 })
-    .isAlphanumeric()
-    .trim(),
-  body("confirmPassword")
-    .trim()
-    .custom((value, { req }) => {
-      if (value !== req.body.password) {
-        throw new Error("Password not matched!");
-      }
-    }),
+  ).isLength({ min: 6 }),
+  body("confirmPassword").custom((value, { req }) => {
+    console.log(value);
+    if (value !== req.body.password) {
+      throw new Error("Password not matched!");
+    }
+    return true;
+  }),
   authController.postSignup
 );
 
