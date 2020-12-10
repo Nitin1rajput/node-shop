@@ -23,9 +23,19 @@ router.post(
   shopController.postCartDeleteProduct
 );
 
+router.get("/checkout", isAuthMiddleware, shopController.getCheckout);
+
+router.get(
+  "/checkout/success",
+  isAuthMiddleware,
+  shopController.getCheckoutSuccess
+);
+router.get("/checkout/cancel", isAuthMiddleware, shopController.getCheckout);
+
 router.post("/create-order", isAuthMiddleware, shopController.postOrder);
 
 router.get("/orders", isAuthMiddleware, shopController.getOrders);
 
 router.get("/orders/:orderId", isAuthMiddleware, shopController.getInvoice);
+
 module.exports = router;
