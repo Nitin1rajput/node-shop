@@ -18,7 +18,10 @@ main {
 form {
   display: inline;
 }
-
+.icon {
+  display: flex;
+  justify-content: space-between;
+}
 .centered {
   text-align: center;
 }

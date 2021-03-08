@@ -1,3 +1,4 @@
+const fs = require("fs");
 const mongoose = require("mongoose");
 const Product = require("../models/product");
 
@@ -13,6 +14,7 @@ exports.getAddProduct = (req, res, next) => {
     path: "/admin/add-product",
     editing: false,
     hasError: false,
+    userName: req.user.name,
     isAuthenticated: req.session.isLoggedIn,
     product: {},
     errorMessage: "",
@@ -25,7 +27,7 @@ exports.postAddProduct = (req, res, next) => {
   const image = req.file;
   const price = req.body.price;
   const description = req.body.description;
-
+  console.log(image);
   if (!image) {
     return res.status(422).render("admin/edit-product", {
       pageTitle: "Add Product",
@@ -37,12 +39,22 @@ exports.postAddProduct = (req, res, next) => {
         price: price,
         description: description,
       },
+      userName: req.user.name,
       errorMessage: "Attached file is not an image.",
       validationErrors: [],
     });
   }
+  const imageUrl = image.path;
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    if (req.file) {
+      fs.unlink(req.file.path, (err) => {
+        console.log(err);
+      });
+    }
+    if (res.headerSent) {
+      return next(error);
+    }
     return res.status(422).render("admin/edit-product", {
       pageTitle: "Add Product",
       path: "/admin/add-product",
@@ -54,11 +66,12 @@ exports.postAddProduct = (req, res, next) => {
         price: price,
         description: description,
       },
+      userName: req.user.name,
       errorMessage: errors.array()[0].msg,
       validationErrors: errors.array(),
     });
   }
-  const imageUrl = image.path;
+
   const product = new Product({
     title: title,
     price: price,
@@ -73,15 +86,16 @@ exports.postAddProduct = (req, res, next) => {
       res.redirect("/admin/products");
     })
     .catch((err) => {
-      // res.status(500).render("admin/edit-product", {
-      //   pageTitle: "Add Product",
-      //   path: "admin/add-product",
-      //   editing: false,
-      //   errorMessage: "Database operation failed, please try again",
-      // });
-      const error = new Error("Creating Product Failed");
-      error.httpStatusCode = 500;
-      return next(error);
+      res.status(500).render("admin/edit-product", {
+        pageTitle: "Add Product",
+        path: "admin/add-product",
+        editing: false,
+        userName: req.user.name,
+        errorMessage: "Database operation failed, please try again",
+      });
+      // const error = new Error("Creating Product Failed");
+      // error.httpStatusCode = 500;
+      // return next(error);
     });
 };
 
@@ -103,6 +117,7 @@ exports.getEditProduct = (req, res, next) => {
         editing: editMode,
         product: product,
         hasError: false,
+        userName: req.user.name,
         isAuthenticated: req.session.isLoggedIn,
         errorMessage: null,
         validationErrors: [],
@@ -129,6 +144,7 @@ exports.postEditProduct = (req, res, next) => {
       path: "/admin/edit-product",
       editing: true,
       hasError: true,
+      userName: req.user.name,
       product: {
         title: updatedTitle,
         price: updatedPrice,
@@ -167,7 +183,9 @@ exports.postEditProduct = (req, res, next) => {
 exports.getProducts = (req, res, next) => {
   const page = +req.query.page || 1;
   let totalItems;
-  Product.find({ userId: req.user._id })
+  let id = req.user.id;
+  console.log(id);
+  Product.find({ userId: req.user.id })
     .countDocuments()
     .then((numProducts) => {
       totalItems = numProducts;
@@ -177,10 +195,12 @@ exports.getProducts = (req, res, next) => {
     })
 
     .then((products) => {
+      console.log(products);
       res.render("admin/products", {
         prods: products,
         pageTitle: "Admin Products",
         path: "/admin/products",
+        userName: req.user.name,
         currentPage: page,
         hasNextPage: ITEMS_PER_PAGE * page < totalItems,
         hasPreviousPage: page > 1,

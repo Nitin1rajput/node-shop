@@ -6,7 +6,6 @@ const PDFDocument = require("pdfkit");
 
 const Product = require("../models/product");
 const Order = require("../models/order");
-const { toASCII } = require("punycode");
 
 const ITEMS_PER_PAGE = 2;
 
@@ -17,6 +16,7 @@ exports.getProducts = (req, res, next) => {
         prods: products,
         pageTitle: "All Products",
         path: "/products",
+        userName: req.user && req.user.name,
         isAuthenticated: req.session.isLoggedIn,
       });
     })
@@ -35,6 +35,8 @@ exports.getProduct = (req, res, next) => {
         product: product,
         pageTitle: product.title,
         path: "/products",
+
+        userName: req.user.name && "",
         isAuthenticated: req.session.isLoggedIn,
       });
     })
@@ -58,6 +60,7 @@ exports.getIndex = (req, res, next) => {
         prods: products,
         pageTitle: "Shop",
         path: "/",
+        userName: req.user && req.user.name,
         currentPage: page,
         hasNextPage: ITEMS_PER_PAGE * page < totalItems,
         hasPreviousPage: page > 1,
@@ -83,6 +86,7 @@ exports.getCart = (req, res, next) => {
         path: "/cart",
         pageTitle: "Your Cart",
         products: products,
+        userName: req.user.name,
         isAuthenticated: req.session.isLoggedIn,
       });
     })
@@ -150,6 +154,7 @@ exports.getCheckout = (req, res, next) => {
         path: "/checkout",
         pageTitle: "Checkout",
         products: products,
+        userName: req.user.name,
         isAuthenticated: req.session.isLoggedIn,
         totalSum: total,
         sessionId: session.id,
@@ -228,6 +233,7 @@ exports.getOrders = (req, res, next) => {
         path: "/orders",
         pageTitle: "Your Orders",
         orders: orders,
+        userName: req.user.name,
         isAuthenticated: req.session.isLoggedIn,
       });
     })

@@ -1,5 +1,5 @@
 const path = require("path");
-
+const fs = require("fs");
 const express = require("express");
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv").config();
@@ -97,9 +97,19 @@ app.use(errorController.get404);
 
 app.use((error, req, res, next) => {
   // res.redirect("/500");
+  console.log(error);
+  if (req.file) {
+    fs.unlink(req.file.path, (err) => {
+      console.log(err);
+    });
+  }
+  if (res.headerSent) {
+    return next(error);
+  }
   res.status(500).render("500", {
     pageTitle: "Error 500",
     path: "/500",
+    userName: req.user && req.user.name,
     isAuthenticated: req.session.isLoggedIn,
   });
 });
