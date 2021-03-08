@@ -156,12 +156,12 @@ exports.postEditProduct = (req, res, next) => {
         fileHelper.deleteFile(product.imageUrl);
         product.imageUrl = image.path;
       }
-      return product.save();
+      return product.save().then((result) => {
+        console.log("UPDATED PRODUCT!");
+        res.redirect("/admin/products");
+      });
     })
-    .then((result) => {
-      console.log("UPDATED PRODUCT!");
-      res.redirect("/admin/products");
-    })
+
     .catch((err) => {
       const error = new Error(err);
       error.httpStatusCode = 500;
@@ -172,7 +172,7 @@ exports.postEditProduct = (req, res, next) => {
 exports.getProducts = (req, res, next) => {
   const page = +req.query.page || 1;
   let totalItems;
-  Product.find()
+  Product.find({ userId: req.user._id })
     .countDocuments()
     .then((numProducts) => {
       totalItems = numProducts;
@@ -229,7 +229,7 @@ exports.deleteProduct = (req, res, next) => {
         return next(new Error("Product not found"));
       }
       fileHelper.deleteFile(prod.imageUrl);
-      return Product.findOneAndDelete({ _id: prodId, userId: req.user._id });
+      return Product.deleteOne({ _id: prodId, userId: req.user._id });
     })
     .then(() => {
       console.log("DESTROYED PRODUCT");

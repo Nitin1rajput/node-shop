@@ -3,6 +3,7 @@ const { check, body } = require("express-validator");
 const { Error } = require("mongoose");
 
 const authController = require("../controllers/auth");
+const isAuthMiddleware = require("../middleware/is-auth.middleware");
 const User = require("../models/user");
 
 const router = express.Router();
@@ -58,5 +59,11 @@ router.post(
 );
 
 router.post("/logout", authController.postLogout);
+
+router.get("/reset", authController.getReset);
+router.post("/reset", authController.postReset);
+
+router.get("/reset/:token", authController.getNewPassord);
+router.post("/new-password", authController.postNewPassword);
 
 module.exports = router;
