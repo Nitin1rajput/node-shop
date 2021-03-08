@@ -43,7 +43,6 @@ exports.postAddProduct = (req, res, next) => {
   }
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    console.log(errors.array());
     return res.status(422).render("admin/edit-product", {
       pageTitle: "Add Product",
       path: "/admin/add-product",
@@ -71,8 +70,6 @@ exports.postAddProduct = (req, res, next) => {
   product
     .save()
     .then((result) => {
-      // console.log(result);
-      console.log("Created Product");
       res.redirect("/admin/products");
     })
     .catch((err) => {
@@ -89,7 +86,6 @@ exports.postAddProduct = (req, res, next) => {
 };
 
 exports.getEditProduct = (req, res, next) => {
-  // console.log("hua");
   const editMode = req.query.edit;
   if (!editMode) {
     return res.redirect("/");
@@ -113,10 +109,9 @@ exports.getEditProduct = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
-      // const error = new Error(err);
-      // error.httpStatusCode = 500;
-      // return next(error);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
 };
 

@@ -2,11 +2,10 @@ const bycrypt = require("bcrypt");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const nodeMailgun = require("nodemailer-mailgun-transport");
-
 const auth = {
   auth: {
-    api_key: "aac279ce764fad9893539151131da335-4879ff27-ae34a46c",
-    domain: "sandbox8adedf7b4ac342969377be742aa8f08e.mailgun.org",
+    api_key: process.env.MAILGUN_API,
+    domain: process.env.MAILGUN_DOMAIN,
   },
 };
 let transporter = nodemailer.createTransport(nodeMailgun(auth));
@@ -82,7 +81,6 @@ exports.postLogin = (req, res, next) => {
             req.session.isLoggedIn = true;
             req.session.user = user;
             return req.session.save((err) => {
-              console.log(err);
               return res.redirect("/");
             });
           }
@@ -115,7 +113,6 @@ exports.postSignup = (req, res, next) => {
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    console.log(errors);
     return res.status(422).render("auth/signup", {
       path: "/signup",
       pageTitle: "SignUp",
@@ -156,7 +153,6 @@ exports.postSignup = (req, res, next) => {
 
 exports.postLogout = (req, res, next) => {
   req.session.destroy((err) => {
-    console.log(err);
     res.redirect("/");
   });
 };
@@ -179,7 +175,6 @@ exports.getReset = (req, res, next) => {
 exports.postReset = (req, res, next) => {
   crypto.randomBytes(32, (err, buffer) => {
     if (err) {
-      console.log(err);
       return res.redirect("/reset");
     }
     const token = buffer.toString("hex");
@@ -188,7 +183,6 @@ exports.postReset = (req, res, next) => {
       .then((user) => {
         if (!user) {
           req.flash("error", "No account with that email found");
-          console.log("Found ni hua");
           return res.redirect("/reset");
         } else {
           user.resetToken = token;
@@ -203,7 +197,7 @@ exports.postReset = (req, res, next) => {
           to: req.body.email,
           subject: "Password Reset",
           html: `<p>You requested a password reset</p>
-          <p>Click this <a href="http://localhost:3000/reset/${token}">Link</a>to reset</p>`,
+          <p>Click this <a href="${process.env.BACKEND_URL}/reset/${token}">Link</a>to reset</p>`,
         };
         transporter.sendMail(mailOptions);
       })
@@ -214,12 +208,9 @@ exports.postReset = (req, res, next) => {
 };
 exports.getNewPassord = (req, res, next) => {
   const token = req.params.token;
-  console.log(token);
   const date = Date.now();
-  console.log(date);
   User.findOne({ resetToken: token, resetTokenExpiry: { $gt: Date.now() } })
     .then((user) => {
-      console.log(user);
       let message = req.flash("error");
       if (message.length > 0) {
         message = message[0];

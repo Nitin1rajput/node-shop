@@ -1,8 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const stripe = require("stripe")(
-  "sk_test_51HwoGSHzXo8qiZCFrn8iLnV4ZjYXxHXrtHxUNKQjJN5hvRn1nLxW7X0RTPWZMRB957bm2j1sRjySXEjbcFlmjsy300H5b5AZjt"
-);
+const stripe = require("stripe")(process.env.STRIPE_API);
 
 const PDFDocument = require("pdfkit");
 
@@ -31,7 +29,6 @@ exports.getProducts = (req, res, next) => {
 
 exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
-  console.log(prodId);
   Product.findById(prodId)
     .then((product) => {
       res.render("shop/product-detail", {
